@@ -27,22 +27,27 @@ Menu shortcut:
   --rofi               Add --rofi to jerry (external menu is enabled by default)
 
 Examples:
-```  jerry-shader --screen 0
+```  
+  jerry-shader --screen 0
   jerry-shader Keijo
-  jerry-shader --screen 1 --rofi --allanime Frieren```
+  jerry-shader --screen 1 --rofi --allanime Frieren
+```
   
 
 IMPORTANT:
-  For the shader picker to work, this exact command must be added to ~/.config/mpv/input.conf:
+  For the shader picker to work, this exact command must be added to `~/.config/mpv/input.conf`:
+```
   s no-osd set pause yes; run /usr/bin/kitty --class mpv-shader-picker --title Shader-Picker sh -lc     "$HOME/bin/jerry-preset"; no-osd set pause no
-
+```
 
 ⚠️ This is a personal patchset. Expect rough edges.
 
 
 Installation:
 
-```git clone https://github.com/ViggoRomrakett/jerry-shader
+```
+git clone https://github.com/ViggoRomrakett/jerry-shader
 cd jerry-shader
 chmod +x install.sh
-./install.sh```
+./install.sh
+```
