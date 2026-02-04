@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CACHE_CHAIN="${JERRY_GLSL_CACHE:-${XDG_RUNTIME_DIR:-/tmp}/jerry-glsl-chain-$UID}"
+
+SHDIR="$HOME/.config/mpv/shaders"
+
+STRONG="$SHDIR/Anime4K_Clamp_Highlights.glsl:$SHDIR/Anime4K_Restore_CNN_VL.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_VL.glsl:$SHDIR/Anime4K_AutoDownscalePre_x2.glsl:$SHDIR/Anime4K_AutoDownscalePre_x4.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_M.glsl"
+MEDIUM="$SHDIR/Anime4K_Clamp_Highlights.glsl:$SHDIR/Anime4K_Restore_CNN_Soft_VL.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_VL.glsl:$SHDIR/Anime4K_AutoDownscalePre_x2.glsl:$SHDIR/Anime4K_AutoDownscalePre_x4.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_M.glsl"
+WEAK="$SHDIR/Anime4K_Clamp_Highlights.glsl:$SHDIR/Anime4K_Upscale_Denoise_CNN_x2_VL.glsl:$SHDIR/Anime4K_AutoDownscalePre_x2.glsl:$SHDIR/Anime4K_AutoDownscalePre_x4.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_M.glsl"
+LUDICROUS="$SHDIR/Anime4K_Clamp_Highlights.glsl:$SHDIR/Anime4K_Restore_CNN_VL.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_VL.glsl:$SHDIR/Anime4K_Restore_CNN_M.glsl:$SHDIR/Anime4K_AutoDownscalePre_x2.glsl:$SHDIR/Anime4K_AutoDownscalePre_x4.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_M.glsl"
+
+choice=$(
+  printf "%s\n" \
+    "No shader" \
+    "Weak (Anime4K Mode C)" \
+    "Medium (Anime4K Mode B)" \
+    "Strong (Anime4K Mode A)" \
+    "A+A (too strong lol)" |
+  fzf --prompt="Shader preset > " --height=40% --border
+) || true
+
+choice="${choice:-No shader}"
+
+case "$choice" in
+  Weak*)   printf "%s" "$WEAK"      > "$CACHE_CHAIN" ;;
+  Medium*) printf "%s" "$MEDIUM"    > "$CACHE_CHAIN" ;;
+  Strong*) printf "%s" "$STRONG"    > "$CACHE_CHAIN" ;;
+  A+A*)    printf "%s" "$LUDICROUS" > "$CACHE_CHAIN" ;;
+  *)       rm -f "$CACHE_CHAIN" ;;
+esac

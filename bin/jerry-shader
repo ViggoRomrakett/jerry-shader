@@ -1,0 +1,174 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# -------- config --------
+JERRY_BIN="${JERRY_BIN:-$HOME/bin/jerry-patched}"
+CACHE_CHAIN="${XDG_RUNTIME_DIR:-/tmp}/jerry-glsl-chain-$UID"
+SHDIR="$HOME/.config/mpv/shaders"
+
+
+# Shader chains (colon-separated for mpv)
+STRONG="$SHDIR/Anime4K_Clamp_Highlights.glsl:$SHDIR/Anime4K_Restore_CNN_VL.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_VL.glsl:$SHDIR/Anime4K_AutoDownscalePre_x2.glsl:$SHDIR/Anime4K_AutoDownscalePre_x4.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_M.glsl"
+MEDIUM="$SHDIR/Anime4K_Clamp_Highlights.glsl:$SHDIR/Anime4K_Restore_CNN_Soft_VL.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_VL.glsl:$SHDIR/Anime4K_AutoDownscalePre_x2.glsl:$SHDIR/Anime4K_AutoDownscalePre_x4.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_M.glsl"
+WEAK="$SHDIR/Anime4K_Clamp_Highlights.glsl:$SHDIR/Anime4K_Upscale_Denoise_CNN_x2_VL.glsl:$SHDIR/Anime4K_AutoDownscalePre_x2.glsl:$SHDIR/Anime4K_AutoDownscalePre_x4.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_M.glsl"
+LUDICROUS="$SHDIR/Anime4K_Clamp_Highlights.glsl:$SHDIR/Anime4K_Restore_CNN_VL.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_VL.glsl:$SHDIR/Anime4K_Restore_CNN_M.glsl:$SHDIR/Anime4K_AutoDownscalePre_x2.glsl:$SHDIR/Anime4K_AutoDownscalePre_x4.glsl:$SHDIR/Anime4K_Upscale_CNN_x2_M.glsl"
+
+# ------------------------
+
+want_shader_menu=1
+want_pick_screen=0
+screen_arg=""
+menu_mode=""     # "" or "rofi"
+provider=""      # if set, adds: -w <provider>
+pass_through=()
+
+preset="No shader"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  jerry-shader [options] -- [jerry args/query...]
+  jerry-shader [options] [jerry args/query...]
+
+Options (wrapper):
+  --no-shader-menu     Skip shader picker (keep "No shader")
+  --screen N           Force fullscreen to fs-screen N (mpv option)
+  --pick-screen        Pick screen interactively (Hyprland monitors if available)
+  --clear-screen       Unset forced screen (uses mpv default behavior)
+
+Provider shortcuts (optional):
+  --cr                 crunchyroll
+  --allanime           allanime
+  --aniwatch           aniwatch
+  --yugen              yugen
+  --hdrezka            hdrezka
+
+Menu shortcut:
+  --rofi               Add --rofi to jerry (external menu)
+
+Examples:
+  jerry-shader --rofi -i "Keijo"
+  jerry-shader --screen 1 --rofi -i -w allanime "Frieren"
+  jerry-shader --pick-screen --cr --rofi -i "test"
+EOF
+}
+
+pick_shader() {
+  local choice
+  choice=$(
+    printf "%s\n" \
+      "No shader" \
+      "Weak (Anime4K Mode C)" \
+      "Medium (Anime4K Mode B)" \
+      "Strong (Anime4K Mode A)" \
+      "A+A (too strong lol)" |
+    fzf --prompt="Shader preset > " --height=40% --border
+  ) || true
+
+  preset="${choice:-No shader}"
+}
+
+pick_screen() {
+  local id=""
+  if command -v hyprctl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+    id=$(
+      hyprctl monitors -j |
+      jq -r '.[] | "\(.id)\t\(.name)\t\(.width)x\(.height)@\(.refreshRate|floor)\t" + (if .focused then "[focused]" else "" end)' |
+      column -t |
+      fzf --prompt="Fullscreen screen > " --height=40% --border |
+      awk '{print $1}'
+    ) || true
+  else
+    id=$(
+      printf "0\n1\n2\n3\n" |
+      fzf --prompt="Fullscreen screen (id) > " --height=40% --border
+    ) || true
+  fi
+
+  screen_arg="${id:-}"
+}
+
+# Parse wrapper flags; everything else is passed to jerry
+while (($#)); do
+  case "$1" in
+    --no-shader-menu) want_shader_menu=0; shift ;;
+    --screen) screen_arg="${2:-}"; shift 2 ;;
+    --pick-screen) want_pick_screen=1; shift ;;
+    --clear-screen) screen_arg=""; shift ;;
+
+    --cr) provider="crunchyroll"; shift ;;
+    --allanime) provider="allanime"; shift ;;
+    --aniwatch) provider="aniwatch"; shift ;;
+    --yugen) provider="yugen"; shift ;;
+    --hdrezka) provider="hdrezka"; shift ;;
+
+    --rofi) menu_mode="rofi"; shift ;;
+
+    -h|--help) usage; exit 0 ;;
+    --) shift; break ;;
+    *) pass_through+=( "$1" ); shift ;;
+  esac
+done
+
+# Remaining args after `--`
+if (($#)); then
+  pass_through+=( "$@" )
+fi
+
+# Choose shader preset
+if (( want_shader_menu )); then
+  pick_shader
+fi
+
+# Choose screen
+if (( want_pick_screen )) && [[ -z "${screen_arg:-}" ]]; then
+  pick_screen
+fi
+
+# Export env vars for mpv Lua script
+export JERRY_SESSION=1
+export JERRY_GLSL_CACHE="$CACHE_CHAIN"
+
+
+# Only set if user provided a screen
+if [[ -n "${screen_arg:-}" ]]; then
+  export JERRY_FS_SCREEN="$screen_arg"
+else
+  unset JERRY_FS_SCREEN || true
+fi
+
+if (( want_shader_menu )); then
+  case "$preset" in
+    Weak*)   printf "%s" "$WEAK"      > "$CACHE_CHAIN" ;;
+    Medium*) printf "%s" "$MEDIUM"    > "$CACHE_CHAIN" ;;
+    Strong*) printf "%s" "$STRONG"    > "$CACHE_CHAIN" ;;
+    A+A*)    printf "%s" "$LUDICROUS" > "$CACHE_CHAIN" ;;
+    *)       rm -f "$CACHE_CHAIN" ;;
+  esac
+fi
+
+
+
+# Build jerry args
+jerry_args=()
+
+# provider override
+if [[ -n "${provider:-}" ]]; then
+  jerry_args+=( -w "$provider" )
+fi
+
+# external menu
+if [[ "${menu_mode:-}" == "rofi" ]]; then
+  jerry_args+=( --rofi )
+fi
+
+jerry_args+=( "${pass_through[@]}" )
+
+echo "JERRY_SESSION=$JERRY_SESSION" >&2
+echo "JERRY_FS_SCREEN=${JERRY_FS_SCREEN-}" >&2
+echo "JERRY_GLSL_CACHE=$JERRY_GLSL_CACHE" >&2
+echo "CACHE_CHAIN_EXISTS=$(test -f "$CACHE_CHAIN" && echo yes || echo no)" >&2
+
+export rofi_prompt_config="$HOME/.config/rofi/jerry.rasi"
+
+exec "$JERRY_BIN" "${jerry_args[@]}"

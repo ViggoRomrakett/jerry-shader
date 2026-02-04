@@ -1,0 +1,8 @@
+configuration {
+  show-icons: true;
+  columns: 4;
+  location: 0;
+  anchor: 0;
+}
+
+@theme "/home/viggo/.config/rofi/themes/jerry-cards.rasi"

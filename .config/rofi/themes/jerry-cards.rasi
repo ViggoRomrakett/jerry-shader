@@ -1,0 +1,108 @@
+/* jerry-cards.rasi — grid “poster card” dmenu */
+
+* {
+  font: "Noto Sans 14";
+
+  bg:      rgba(10, 12, 18, 0.55);    /* fullscreen scrim */
+  panel:   rgba(15, 17, 26, 0.78);    /* main container */
+  card:    rgba(21, 24, 39, 0.70);
+  card-hi: rgba(42, 47, 66, 0.90);
+
+  fg:      #cdd6f4;
+  fg-dim:  rgba(205, 214, 244, 0.78);
+
+  /* Try this if you still see white bleeding in some places */
+  background-color: transparent;
+  text-color: @fg;
+}
+
+configuration {
+  show-icons: true;
+  /* jerry rows may contain markup; harmless if not */
+  markup-rows: true;
+}
+
+window {
+  fullscreen: true;
+  background-color: @bg;
+}
+
+/* main panel */
+mainbox {
+  background-color: transparent;
+  padding: 64px;
+}
+
+box {
+  background-color: @panel;
+  border-radius: 18px;
+  padding: 18px;
+  spacing: 14px;
+}
+
+/* top bar */
+inputbar {
+  background-color: rgba(255,255,255,0.04);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+prompt, entry, textbox, message {
+  background-color: transparent;
+  text-color: @fg;
+}
+
+message {
+  padding: 8px 4px 2px 4px;
+  text-color: @fg-dim;
+}
+
+/* the grid */
+listview {
+  background-color: transparent;
+
+  layout: vertical;
+  columns: 5;          /* tweak: 5–7 for 1440p */
+  lines: 2;            /* tweak: 3–4 */
+  fixed-height: true;
+
+  spacing: 14px;
+  cycle: true;
+  scrollbar: false;
+  dynamic: false;
+  fixed-columns: true;
+}
+
+/* each card */
+element {
+  background-color: @card;
+  border-radius: 18px;
+  padding: 26px 16px;     /* ↑ from 14 */
+  orientation: vertical;
+  spacing: 10px;     /* ↑ from 10 */
+}
+
+
+/* poster image */
+element-icon {
+  size: 400px;               /* tweak 150–210 */
+  border-radius: 12px;
+  horizontal-align: 0.5;
+}
+
+/* title text */
+element-text {
+  background-color: transparent;
+  text-color: @fg;
+  horizontal-align: 0.5;
+  vertical-align: 0.5;
+  max-lines: 2;
+  ellipsize: true;
+}
+
+element selected {
+  background-color: @card-hi;
+  border: 2px;
+  border-color: rgba(137, 180, 250, 0.6);
+}
+
