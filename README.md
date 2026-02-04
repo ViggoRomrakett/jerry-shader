@@ -38,3 +38,11 @@ IMPORTANT:
 
 
 ⚠️ This is a personal patchset. Expect rough edges.
+
+
+Installation:
+
+git clone https://github.com/ViggoRomrakett/jerry-shader
+cd jerry-shader
+chmod +x install.sh
+./install.sh
