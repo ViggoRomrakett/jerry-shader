@@ -12,6 +12,7 @@ echo "[*] Installing scripts into $HOME_BIN…"
 mkdir -p "$HOME_BIN"
 
 install -m755 bin/jerry-shader         "$HOME_BIN/jerry-shader"
+install -m755 bin/jerry-preset         "$HOME_BIN/jerry-preset"
 install -m755 bin/jerry-patched        "$HOME_BIN/jerry-patched"
 install -m755 bin/jerrydiscordpresence.py "$HOME_BIN/jerrydiscordpresence.py"
 
