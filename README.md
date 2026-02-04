@@ -27,7 +27,7 @@ Menu shortcut:
   --rofi               Add --rofi to jerry (external menu is enabled by default)
 
 Examples:
-  jerry-shader --screen 0
+```  jerry-shader --screen 0
   jerry-shader Keijo
   jerry-shader --screen 1 --rofi --allanime Frieren
   
@@ -42,7 +42,7 @@ IMPORTANT:
 
 Installation:
 
-git clone https://github.com/ViggoRomrakett/jerry-shader
+```git clone https://github.com/ViggoRomrakett/jerry-shader
 cd jerry-shader
 chmod +x install.sh
 ./install.sh
