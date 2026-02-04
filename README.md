@@ -31,5 +31,9 @@ Examples:
   jerry-shader --screen 1 --rofi -i -w allanime "Frieren"
   jerry-shader --pick-screen --cr --rofi -i "test"
 
+IMPORTANT:
+  For the shader picker to work, this exact command must be added to ~/.config/mpv/input.conf:
+  s no-osd set pause yes; run /usr/bin/kitty --class mpv-shader-picker --title Shader-Picker sh -lc     "$HOME/bin/jerry-preset"; no-osd set pause no
+
 
 ⚠️ This is a personal patchset. Expect rough edges.
