@@ -29,7 +29,7 @@ Menu shortcut:
 Examples:
 ```  jerry-shader --screen 0
   jerry-shader Keijo
-  jerry-shader --screen 1 --rofi --allanime Frieren
+  jerry-shader --screen 1 --rofi --allanime Frieren```
   
 
 IMPORTANT:
@@ -45,4 +45,4 @@ Installation:
 ```git clone https://github.com/ViggoRomrakett/jerry-shader
 cd jerry-shader
 chmod +x install.sh
-./install.sh
+./install.sh```
