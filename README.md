@@ -51,3 +51,19 @@ cd jerry-shader
 chmod +x install.sh
 ./install.sh
 ```
+
+Dependencies:
+  -mpv
+  -rofi
+  -fzf
+  -kitty
+  -jq
+  -curl
+  -python
+  -python-httpx
+  -python-pypresence
+
+Install Dependencies:
+```
+sudo pacman -S --needed mpv rofi fzf kitty jq curl python python-httpx python-pypresence
+```
