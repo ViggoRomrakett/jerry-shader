@@ -32,7 +32,8 @@ Examples:
   jerry-shader Keijo
   jerry-shader --screen 1 --rofi --allanime Frieren
 ```
-  
+How to apply shader:
+Just press `s` while an mpv is playing.
 
 IMPORTANT:
   For the shader picker to work, this exact command must be added to `~/.config/mpv/input.conf`:
